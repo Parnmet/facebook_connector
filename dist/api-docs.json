@@ -1,0 +1,201 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Facebook Connector",
+    "description": "All things you can use in this API"
+  },
+  "basePath": "/",
+  "tags" : [
+    {
+      "name": "Facebook",
+      "description": "API for connecting Facebook"
+    }
+  ],
+  "schemes": [
+    "http"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/facebook/getPageDetail": {
+      "get":{
+        "tags": [ "Facebook"],
+        "description": "get Detail of given PageID",
+        "operationId": "",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "pageID",
+            "in": "query",
+            "description": "pageID",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "response"
+          }
+        }
+      }
+    },
+    "/facebook/getUserDetail": {
+      "get":{
+        "tags": [ "Facebook"],
+        "description": "get Detail of given UserID",
+        "operationId": "",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "userID",
+            "in": "query",
+            "description": "userID",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "response"
+          }
+        }
+      }
+    },
+    "/facebook/getFeedByPageID": {
+      "get":{
+        "tags": [ "Facebook"],
+        "description": "get Feed message on Facebook Page by given PageID",
+        "operationId": "",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "pageID",
+            "in": "query",
+            "description": "pageID",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "description": "Feed's start date (YYYY-MM-DD)",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "until",
+            "in": "query",
+            "description": "Feed's end date (YYYY-MM-DD)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "response"
+          }
+        }
+      }
+    },
+    "/facebook/getCommentByPostID": {
+      "get":{
+        "tags": [ "Facebook"],
+        "description": "get Comment message on Facebook Post by given PostID",
+        "operationId": "",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "postID",
+            "in": "query",
+            "description": "postID",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "response"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "create": {
+      "properties": {
+        "eventId": {
+          "required":true,
+          "type": "string",
+          "example": "mathmaticial"
+        },
+        "numberRequired": {
+          "required":true,
+          "type":"integer",
+          "format": "int64",
+          "example": 500
+        }
+      }
+    },
+    "response1": {
+      "properties": {
+        "jobID": {
+          "required":true,
+          "type": "string",
+          "example": "23423456543"
+        },
+        "request": {
+          "required":true,
+          "type": "schema",
+          "example": {
+            "eventId":"mathmaticial",
+            "numberRequired": 500
+          }
+        }
+      }
+    },
+    "response": {
+      "properties": {
+        "jobID": {
+          "required": true,
+          "type" : "string",
+          "example" : "12321432423"
+        }
+      }
+    },
+    "delete": {
+      "properties": {
+        "jobID": {
+          "required": true,
+          "type" : "string",
+          "example" : "234344234234"
+        },
+        "status" : {
+          "required": true,
+          "type": "string",
+          "example": "deleted"
+        }
+      }
+    },
+    "400error" : {
+      "properties": {
+        "message": {
+          "type": "string",
+          "example" : "400 Bad Request"
+        }
+      }
+    }
+  }
+}
