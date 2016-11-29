@@ -5,7 +5,6 @@ import * as FacebookService from '../service/FacebookService'
 let facebookRouter = express.Router()
 
 
-
 facebookRouter.route('/').get((req, res) => {
   res.send('<h1>Facebook Connector</h1>')
 })
