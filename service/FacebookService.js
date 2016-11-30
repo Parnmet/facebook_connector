@@ -92,6 +92,38 @@ function saveFBpost(pageID) {
   })
 }
 
+function saveFBcomment(postID) {
+  getFbComment(postID).then(comments => {
+    comments.data.forEach(comment => {
+      db.FB_COMMENT.findOne({id: comment.id}, (err, document) => {
+        if(!document) {
+          comment.postID = postID
+          comment.created_time = new Date(comment.created_time)
+          db.FB_COMMENT.insert(comment, err=> {
+            if(err) {
+              console.log(err)
+            }
+          })
+        }
+      })
+    })
+  })
+}
+
+//cron for comment
+const cronSaveFBcomment = new cronJob('*/30 * * * * *', () => {
+  db.FB_POST.find((err, document) => {
+    document.forEach(feed => {
+      saveFBcomment(feed.id)
+    })
+  })
+},
+() => {
+  console.log('cronSaveFBcomment')
+},
+true
+)
+
 // cron for post
 const cronSaveFBpost = new cronJob('*/30 * * * * *', () => {
   pageIDs.forEach(pageID => {
@@ -99,7 +131,7 @@ const cronSaveFBpost = new cronJob('*/30 * * * * *', () => {
   })
 },
 () => {
-  console.log('cronSaveFBpost has stopped.');
+  console.log('cronSaveFBpost has stopped.')
 },
 true
 )
