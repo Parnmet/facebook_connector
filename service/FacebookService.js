@@ -60,22 +60,43 @@ function saveFBpage(pageID) {
     if(!document) {
       getFbPageDetail(pageID).then(page => {
         db.FB_PAGE.insert(page, err => {
-          console.log(err)
+          if(err) {
+            console.log(err)
+          }
         })
       })
     }
   })
 }
 
-function saveFBpost() {
-  let currentDate = new Date()
-  let passedDate = new Date()
-  passedDate.setDate(currentDate.getDate() - 2)
+function saveFBpost(pageID) {
+  let until = new Date()
+  let since = new Date()
+  since.setDate(until.getDate() - 5)
+  let untilStr = until.getFullYear() + '-' + (until.getMonth() + 1) + '-' + until.getDate()
+  let sinceStr = since.getFullYear() + '-' + (since.getMonth() + 1) + '-' + since.getDate()
+  getFbFeed(pageID, sinceStr, untilStr).then(feeds => {
+    feeds.data.forEach(feed => {
+      db.FB_POST.findOne({id: feed.id}, (err, document) => {
+        if(!document) {
+          feed.pageID = pageID
+          feed.created_time = new Date(feed.created_time)
+          db.FB_POST.insert(feed, err => {
+            if(err) {
+              console.log(err)
+            }
+          })
+        }
+      })
+    })
+  })
 }
 
-//cron for post
-const cronSaveFBpost = new cronJob('*/5 * * * * *', () => {
-  saveFBpost()
+// cron for post
+const cronSaveFBpost = new cronJob('*/30 * * * * *', () => {
+  pageIDs.forEach(pageID => {
+    saveFBpost(pageID)
+  })
 },
 () => {
   console.log('cronSaveFBpost has stopped.');
