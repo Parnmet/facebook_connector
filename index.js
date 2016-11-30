@@ -44,4 +44,3 @@ swagger.configure(applicationUrl, '1.0.0')
 app.listen(port, () => {
   console.log('Starting node.js on port ' + port)
 });
-

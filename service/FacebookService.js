@@ -11,62 +11,54 @@ const pageIDs = ['157556534255462']
 
 const cronJob = cron.CronJob
 
-export function getFbDetail(userID) {
-    var params = {fields: "name,picture"}
-    return new Promise((resolve) =>{
-        graph.get(userID,params, (err, res) => {
-            resolve(res)
-            if(err != null) {
-              console.log(err)
-            }
-        })
+export function getFbPageDetail(pageID) {
+  var params = {fields: "name,picture"}
+  return new Promise((resolve) => {
+    graph.get(pageID,params, (err, res) => {
+      resolve(res)
+      if(err != null) {
+        console.log(err)
+      }
     })
-
+  })
 }
 
 
-export function getFbFeed(userID,since,until) {
-
-    var params
-    if(since){
-        if(until){
-            params = {fields: "message,created_time",since: since,until:until,limit: 100}
-        }
-        else{
-            params = {fields: "message,created_time",since: since,limit: 100}
-
-        }
+export function getFbFeed(pageID,since,until) {
+  var params
+  if(since) {
+    if(until) {
+      params = {fields: "message,created_time",since: since,until:until,limit: 100}
     }
-    else{
-        params = {fields: "message,created_time",limit: 100}
+    else {
+      params = {fields: "message,created_time",since: since,limit: 100}
     }
+  }
+  else {
+    params = {fields: "message,created_time",limit: 100}
+  }
 
-
-    return new Promise((resolve,reject) => {
-
-        graph.get(userID+"/feed",params,(err ,res) =>{
-                resolve(res)
-        })
-
+  return new Promise((resolve,reject) => {
+    graph.get(pageID+"/feed",params,(err ,res) =>{
+      resolve(res)
     })
-
+  })
 }
 
-export function getFbComment(postID){
-
-    let params = {summary : 1}
-    return new Promise((resolve) => {
-        graph.get(postID+"/comments",params,(err,res) => {
-            resolve(res)
-        })
+export function getFbComment(postID) {
+  let params = {summary : 1}
+  return new Promise((resolve) => {
+    graph.get(postID+"/comments",params,(err,res) => {
+      resolve(res)
     })
+  })
 
 }
 
 function saveFBpage(pageID) {
   db.FB_PAGE.findOne({id: pageID}, (err, document) => {
     if(!document) {
-      getFbDetail(pageID).then(page => {
+      getFbPageDetail(pageID).then(page => {
         db.FB_PAGE.insert(page, err => {
           console.log(err)
         })
@@ -75,6 +67,23 @@ function saveFBpage(pageID) {
   })
 }
 
+function saveFBpost() {
+  let currentDate = new Date()
+  let passedDate = new Date()
+  passedDate.setDate(currentDate.getDate() - 2)
+}
+
+//cron for post
+const cronSaveFBpost = new cronJob('*/5 * * * * *', () => {
+  saveFBpost()
+},
+() => {
+  console.log('cronSaveFBpost has stopped.');
+},
+true
+)
+
+//cron for page
 const cronSaveFBpage = new cronJob('*/30 * * * * *', () => {
   pageIDs.forEach(pageID => {
     saveFBpage(pageID)

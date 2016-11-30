@@ -10,7 +10,7 @@ facebookRouter.route('/').get((req, res) => {
 })
 
 facebookRouter.route('/getPageDetail').get((req, res) => {
-     FacebookService.getFbDetail(req.query.pageID)
+     FacebookService.getFbPageDetail(req.query.pageID)
      .then( (feeds) =>{
         res.send(feeds)
     })
@@ -30,7 +30,7 @@ facebookRouter.route('/getCommentByPostID').get((req, res) => {
 })
 
 facebookRouter.route('/getUserDetail').get((req, res) => {
-     FacebookService.getFbDetail(req.query.userID)
+     FacebookService.getFbPageDetail(req.query.userID)
      .then( (feeds) =>{
         res.send(feeds)
     })
