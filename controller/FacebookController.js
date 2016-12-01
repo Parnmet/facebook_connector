@@ -30,7 +30,7 @@ facebookRouter.route('/getCommentByPostID').get((req, res) => {
 })
 
 facebookRouter.route('/getUserDetail').get((req, res) => {
-     FacebookService.getFbPageDetail(req.query.userID)
+     FacebookService.getFbUser(req.query.userID)
      .then( (feeds) =>{
         res.send(feeds)
     })

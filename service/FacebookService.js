@@ -7,7 +7,7 @@ let access_token = "139610759813141|f928e2e59299981a997116c967a20b1d"
 graph.setAccessToken(access_token)
 
 
-const pageIDs = ['157556534255462']
+const pageIDs = ['157556534255462', '137096719666941', '158324029747']
 
 const cronJob = cron.CronJob
 
@@ -55,7 +55,38 @@ export function getFbComment(postID) {
 
 }
 
-function saveFBpage(pageID) {
+export function getFbUser(userID) {
+  let params = {
+    fields: "id, name, picture"
+  }
+  return new Promise((resolve, reject) => {
+    graph.get(userID, params, (err, res) => {
+      if(!err) {
+        resolve(res)
+      }
+      else {
+        reject(err)
+      }
+    })
+  })
+}
+
+function saveFbUser(userID) {
+  db.FB_USER.findOne({id: userID}, (err, document) => {
+    if(!document) {
+      getFbUser(userID).then(user => {
+        user.picture = user.picture.url
+        db.FB_USER.insert(user, err => {
+          if(err) {
+            console.log(err)
+          }
+        })
+      })
+    }
+  })
+}
+
+function saveFbPage(pageID) {
   db.FB_PAGE.findOne({id: pageID}, (err, document) => {
     if(!document) {
       getFbPageDetail(pageID).then(page => {
@@ -69,7 +100,7 @@ function saveFBpage(pageID) {
   })
 }
 
-function saveFBpost(pageID) {
+function saveFbPost(pageID) {
   let until = new Date()
   let since = new Date()
   since.setDate(until.getDate() - 5)
@@ -79,9 +110,12 @@ function saveFBpost(pageID) {
     feeds.data.forEach(feed => {
       db.FB_POST.findOne({id: feed.id}, (err, document) => {
         if(!document) {
-          feed.pageID = pageID
-          feed.created_time = new Date(feed.created_time)
-          db.FB_POST.insert(feed, err => {
+          let feedTemp = {}
+          feedTemp.id = feed.id
+          feedTemp.created_time = new Date(feed.created_time)
+          feedTemp.msg = feed.message
+          feedTemp.page_id = pageID
+          db.FB_POST.insert(feedTemp, err => {
             if(err) {
               console.log(err)
             }
@@ -92,12 +126,12 @@ function saveFBpost(pageID) {
   })
 }
 
-function saveFBcomment(postID) {
+function saveFbComment(postID) {
   getFbComment(postID).then(comments => {
     comments.data.forEach(comment => {
       db.FB_COMMENT.findOne({id: comment.id}, (err, document) => {
         if(!document) {
-          comment.postID = postID
+          comment.post_id = postID
           comment.created_time = new Date(comment.created_time)
           db.FB_COMMENT.insert(comment, err=> {
             if(err) {
@@ -110,40 +144,59 @@ function saveFBcomment(postID) {
   })
 }
 
-//cron for comment
-const cronSaveFBcomment = new cronJob('*/30 * * * * *', () => {
-  db.FB_POST.find((err, document) => {
-    document.forEach(feed => {
-      saveFBcomment(feed.id)
+//cron for user
+const cronSaveFbUser = new cronJob('*/30 * * * * *', () => {
+  db.FB_COMMENT.find((err, document) => {
+    document.forEach(comment => {
+      saveFbUser(comment.from.id)
     })
   })
 },
 () => {
-  console.log('cronSaveFBcomment')
+  console.log('cronSaveFbUser has stopped')
+},
+true
+)
+
+//cron for comment
+const cronSaveFbComment = new cronJob('*/30 * * * * *', () => {
+  db.FB_POST.find((err, document) => {
+    if(!err) {
+      document.forEach(feed => {
+        saveFbComment(feed.id)
+      })
+    }
+    else {
+      console.log(err)
+    }
+  })
+},
+() => {
+  console.log('cronSaveFbComment has stopped')
 },
 true
 )
 
 // cron for post
-const cronSaveFBpost = new cronJob('*/30 * * * * *', () => {
+const cronSaveFbPost = new cronJob('*/30 * * * * *', () => {
   pageIDs.forEach(pageID => {
-    saveFBpost(pageID)
+    saveFbPost(pageID)
   })
 },
 () => {
-  console.log('cronSaveFBpost has stopped.')
+  console.log('cronSaveFbPost has stopped.')
 },
 true
 )
 
 //cron for page
-const cronSaveFBpage = new cronJob('*/30 * * * * *', () => {
+const cronSaveFbPage = new cronJob('*/30 * * * * *', () => {
   pageIDs.forEach(pageID => {
-    saveFBpage(pageID)
+    saveFbPage(pageID)
   })
 },
 () => {
-  console.log('cronSaveFBpage has stopped.')
+  console.log('cronSaveFbPage has stopped.')
 },
 true
 )
